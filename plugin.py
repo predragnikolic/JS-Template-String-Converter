@@ -32,6 +32,9 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
             return
         first_quote = string_region.begin()
         last_quote = string_region.end() - 1
+        are_quotes = is_quote([self.view.substr(first_quote), self.view.substr(last_quote)])
+        if not are_quotes:
+            return
         # replace quotes
         if is_jsx_attribute(self.view, point) and not is_jsx_attribute_wrapped_with_curly_brackets(self.view, point):
             # insert surrounding curly brackets
