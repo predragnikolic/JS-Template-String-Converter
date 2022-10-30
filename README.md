@@ -1,6 +1,7 @@
 # Getting started
 
 ![example](./images/output.gif)
+<small style="text-align: center;">The GIF was too long, was to lazy to make it smaller</small>
 
 This plugin converts a string to template strings in following cases.
 - When `${` is typed:
