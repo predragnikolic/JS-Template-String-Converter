@@ -1,6 +1,6 @@
 # Getting started
 
-![example](./images/output.gif)
+![example](./images/output1.gif)
 
 This plugin converts a string to template strings in following cases.
 - When `${` is typed:
