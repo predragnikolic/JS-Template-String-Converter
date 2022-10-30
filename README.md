@@ -1,7 +1,6 @@
 # Getting started
 
 ![example](./images/output.gif)
-<small style="text-align: center;">The GIF was too long, was to lazy to make it smaller</small>
 
 This plugin converts a string to template strings in following cases.
 - When `${` is typed:
@@ -13,30 +12,6 @@ let x = `Hello, ${|}`
 // in JSX
 const p = <p class="Hello, ${|"></p>
 const p = <p class={"Hello, ${}"}></p>
-```
-
-- When entering a new line in empty string like `""` or `''` :
-```jsx
-let x = '|'
-let x = `
-|
-`
-
-// it is valid syntax to have new lines in strings in JSX attributes
-// so no conversion will take place
-const p = <p class="|"></p>
-const p = <p class="
-|
-"></p>
-
-// When you add a `${`
-// only then will the string be converted to a template string
-const p = <p class="
-	${|
-"></p>
-const p = <p class={`
-	${|}
-`}></p>
 ```
 
 Press `undo`, to undo the conversion if you do not want template strings.

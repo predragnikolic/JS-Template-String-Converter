@@ -13,8 +13,6 @@ class TextChangeListener(sublime_plugin.TextChangeListener):
         for c in changes:
             if c.str in ['{', "{}"]:
                 sublime.set_timeout(lambda: view.run_command('convert_to_template_string'), 0)
-            if c.str and ord(c.str) == 10:  # match a new line... cannot do this c.str == "\n"
-                sublime.set_timeout(lambda: view.run_command('convert_to_template_string_when_new_line'), 0)
 
 
 class ConvertToTemplateString(sublime_plugin.TextCommand):
@@ -23,7 +21,10 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
         point = get_cursor_point(self.view)
         if not point:
             return
-        string_region = get_string_region(self.view, point)
+        in_supported_file = self.view.match_selector(point, "source.js | source.jsx | source.ts | source.tsx | text.html.ngx | text.html.svelte | text.html.vue")
+        if not in_supported_file:
+            return None
+        string_region = self.view.expand_to_scope(point, "string.quoted.single | string.quoted.double")
         if not string_region:
             return
         prev_char = self.view.substr(sublime.Region(point-2, point))
@@ -43,45 +44,6 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
             edit, sublime.Region(last_quote, last_quote + 1), '`')
         self.view.replace(
             edit, sublime.Region(first_quote, first_quote + 1), '`')
-
-
-class ConvertToTemplateStringWhenNewLine(sublime_plugin.TextCommand):
-    """ This command is guaranteed to executed when { is pressed """
-    def run(self, edit):
-        point = get_cursor_point(self.view)
-        if not point:
-            return
-        string_region = get_string_region(self.view, point)
-        if not string_region:
-            return
-        if not self.view.substr(string_region) in ["'\n'", '"\n"']:
-            return
-        first_quote = string_region.begin()
-        last_quote = string_region.end() - 1
-        if is_jsx_attribute(self.view, point):
-            # it is possible to have new lines in strings in jsx tags
-            # <p class='
-            #   this is
-            #   valid
-            #   in JSX
-            # '>
-            # </p>
-            return
-        # it is invalid to have new lines in strings in js, so make them valid with `
-        self.view.replace(
-            edit, sublime.Region(last_quote, last_quote + 1), '`')
-        self.view.replace(
-            edit, sublime.Region(first_quote, first_quote + 1), '`')
-
-
-def get_string_region(view: sublime.View, point: Optional[int]) -> Optional[sublime.Region]:
-    """ Returns the quoted string region. """
-    if not point:
-        return None
-    in_supported_file = view.match_selector(point, "source.js | source.jsx | source.ts | source.tsx | text.html.ngx | text.html.svelte | text.html.vue")
-    if not in_supported_file:
-        return None
-    return view.expand_to_scope(point, "string.quoted.single | string.quoted.double")
 
 
 def is_jsx_attribute(view: sublime.View, point: int) -> bool:
