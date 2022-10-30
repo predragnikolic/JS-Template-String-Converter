@@ -2,7 +2,7 @@
 
 This plugin converts a string to template strings in following cases.
 - When `${` is typed:
-```
+```jsx
 // | - is the cursor
 let x = 'Hello, ${|'
 let x = `Hello, ${|}`
@@ -13,13 +13,14 @@ const p = <p class={"Hello, ${}"}></p>
 ```
 
 - When entering a new line in empty string like `""` or `''` :
-```
+```jsx
 let x = '|'
 let x = `
 |
 `
 
-// in JSX  it is valid to have new lines in strings in JSX
+// it is valid syntax to have new lines in strings in JSX attributes
+// so no conversion will take place
 const p = <p class="|"></p>
 const p = <p class="
 |
@@ -34,3 +35,5 @@ const p = <p class={`
 	${|}
 `}></p>
 ```
+
+> This plugin is inspired by [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter) by  Megan Rogge.
