@@ -37,8 +37,7 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
         last_quote = regular_string_region.end() - 1
         are_quotes = is_regular_quote([self.view.substr(first_quote), self.view.substr(last_quote)])
         if not are_quotes:
-            return
-        # replace quotes
+            return # sanity check, just to 100% make sure we are replacing quotes
         if is_jsx_attribute(self.view, point) and not is_jsx_attribute_wrapped_with_curly_brackets(self.view, point):
             # insert surrounding curly brackets
             self.view.replace(
@@ -68,17 +67,14 @@ class ConvertToRegularString(sublime_plugin.TextCommand):
         # else transform the template string to a regular string
         first_quote = backtick_string_region.begin()
         last_quote = backtick_string_region.end() - 1
-        # validate if the template string spams only one line
+        # to transform to a regular string, the template string must be on the same line
         first_row, _ = self.view.rowcol(first_quote)
         last_row, _ = self.view.rowcol(last_quote)
         if first_row != last_row:
-            # to transform to a regular string, the template string must be on the same line
-            # if it doesn't bail out
             return
         are_backticks = is_backtick([self.view.substr(first_quote), self.view.substr(last_quote)])
         if not are_backticks:
-            return # sanity check, just to remove something that is not a quote bracket
-        # replace quotes
+            return  # sanity check, just to 100% make sure we are replacing backticks
         self.view.replace(
             edit, sublime.Region(last_quote, last_quote + 1), "'")
         self.view.replace(
@@ -109,6 +105,7 @@ def is_regular_quote(chars: List[str]) -> bool:
 
 def is_backtick(chars: List[str]) -> bool:
     return "`" in chars
+
 
 def in_supported_file(view: sublime.View, point: int) -> bool:
     return view.match_selector(point, "source.js | source.jsx | source.ts | source.tsx | text.html.ngx | text.html.svelte | text.html.vue")
