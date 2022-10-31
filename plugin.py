@@ -24,8 +24,7 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
         point = get_cursor_point(self.view)
         if not point:
             return
-        in_supported_file = self.view.match_selector(point, "source.js | source.jsx | source.ts | source.tsx | text.html.ngx | text.html.svelte | text.html.vue")
-        if not in_supported_file:
+        if not in_supported_file(self.view, point):
             return None
         string_region = self.view.expand_to_scope(point, "string.quoted.single | string.quoted.double")
         if not string_region:
@@ -58,8 +57,7 @@ class ConvertToRegularString(sublime_plugin.TextCommand):
         point = get_cursor_point(self.view)
         if not point:
             return
-        in_supported_file = self.view.match_selector(point, "source.js | source.jsx | source.ts | source.tsx | text.html.ngx | text.html.svelte | text.html.vue")
-        if not in_supported_file:
+        if not in_supported_file(self.view, point):
             return None
         string_region = self.view.expand_to_scope(point, "string.quoted.other")
         if not string_region:
@@ -137,3 +135,7 @@ def is_backtick(chars: List[str]) -> bool:
         if c != "`":
             return False
     return True
+
+
+def in_supported_file(view: sublime.View, point: int) -> bool:
+    return view.match_selector(point, "source.js | source.jsx | source.ts | source.tsx | text.html.ngx | text.html.svelte | text.html.vue")
