@@ -79,24 +79,6 @@ class ConvertToRegularString(sublime_plugin.TextCommand):
         if not are_backticks:
             return # sanity check, just to remove something that is not a quote bracket
         # replace quotes
-        if is_jsx_attribute(self.view, point) and is_jsx_attribute_wrapped_with_curly_brackets(self.view, point):
-            self.view.replace(
-                edit, sublime.Region(last_quote, last_quote + 1), "'")
-            self.view.replace(
-                edit, sublime.Region(first_quote, first_quote + 1), "'")
-            curly_bracket_region = get_surrounding_curly_brackets_region(self.view, point)
-            if not curly_bracket_region:
-                return
-            first_bracket = curly_bracket_region.begin()
-            last_bracket = curly_bracket_region.end() - 1
-            are_curly_brackets = is_curly_bracket([self.view.substr(first_bracket), self.view.substr(last_bracket)])
-            if not are_curly_brackets:
-                return  # sanity check, just to remove something that is not a curly bracket
-            self.view.erase(
-                edit, sublime.Region(last_bracket, last_bracket + 1))
-            self.view.erase(
-                edit, sublime.Region(first_bracket, first_bracket + 1))
-            return
         self.view.replace(
             edit, sublime.Region(last_quote, last_quote + 1), "'")
         self.view.replace(
@@ -111,17 +93,6 @@ def is_jsx_attribute_wrapped_with_curly_brackets(view: sublime.View, point: int)
     return view.match_selector(point, "meta.jsx meta.tag.attributes meta.interpolation meta.string string.quoted")
 
 
-def get_surrounding_curly_brackets_region(view: sublime.View, point: int) -> Optional[sublime.Region]:
-    higher_specificity = view.expand_to_scope(point, "meta.jsx meta.tag.attributes meta.interpolation source.js.embedded meta.jsx meta.tag.attributes meta.interpolation")
-    if higher_specificity:
-        # handles this case, where Dashboard is nested in with {}
-        # let Route = <Route element={<Dashboard type={`test ${}`} />}></Route>
-        return higher_specificity
-    # handles this case
-    # let div = <div class={'test ${}'}></div>
-    return view.expand_to_scope(point, "meta.jsx meta.tag.attributes meta.interpolation")
-
-
 def get_cursor_point(view: sublime.View) -> Optional[int]:
     sel = view.sel()
     if not sel:
@@ -132,13 +103,6 @@ def get_cursor_point(view: sublime.View) -> Optional[int]:
 def is_regular_quote(chars: List[str]) -> bool:
     for c in chars:
         if c not in ["'", '"']:
-            return False
-    return True
-
-
-def is_curly_bracket(chars: List[str]) -> bool:
-    for c in chars:
-        if c not in ["{", '}']:
             return False
     return True
 
