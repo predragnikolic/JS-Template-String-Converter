@@ -104,7 +104,10 @@ def is_regular_quote(chars: List[str]) -> bool:
 
 
 def is_backtick(chars: List[str]) -> bool:
-    return "`" in chars
+    for c in chars:
+        if c != "`":
+            return False
+    return True
 
 
 def in_supported_file(view: sublime.View, point: int) -> bool:
