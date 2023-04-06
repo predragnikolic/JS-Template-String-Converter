@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 import sublime
 import sublime_plugin
@@ -61,8 +62,12 @@ class ConvertToRegularString(sublime_plugin.TextCommand):
         backtick_string_region = get_backtick_string_region(self.view, point)
         if not backtick_string_region:
             return
+        backtick_text = self.view.substr(backtick_string_region)
+        # make sure that the string is surrounded with backticks
+        if not re.match(r"^`.+`$", backtick_text):
+            return
         # if there are ${ that means it is still a template string
-        if '${' in self.view.substr(backtick_string_region):
+        if '${' in backtick_text:
             return
         # else transform the template string to a regular string
         first_quote = backtick_string_region.begin()
