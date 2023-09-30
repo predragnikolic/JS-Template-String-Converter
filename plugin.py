@@ -8,32 +8,33 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
         sel = self.view.sel()
         if not sel:
             return
-        point = sel[0].b
-        if not in_supported_file(self.view, point):
-            return None
-        regular_string_region = get_regular_string_region(self.view, point)
-        if not regular_string_region:
-            return
-        scan_region = self.view.substr(regular_string_region)
-        # the user could typed $ or {
-        if "${" not in scan_region:
-            return
-        first_quote = regular_string_region.begin()
-        last_quote = regular_string_region.end() - 1
-        are_quotes = is_regular_quote(self.view.substr(first_quote)) and is_regular_quote(self.view.substr(last_quote))
-        if not are_quotes:
-            return # sanity check, just to 100% make sure we are replacing quotes
-        if is_jsx_attribute(self.view, point) and not is_jsx_attribute_wrapped_with_curly_brackets(self.view, point):
-            # insert surrounding curly brackets
+        for r in sel:
+            point = r.b
+            if not in_supported_file(self.view, point):
+                return None
+            regular_string_region = get_regular_string_region(self.view, point)
+            if not regular_string_region:
+                continue
+            scan_region = self.view.substr(regular_string_region)
+            # the user could typed $ or {
+            if "${" not in scan_region:
+                continue
+            first_quote = regular_string_region.begin()
+            last_quote = regular_string_region.end() - 1
+            are_quotes = is_regular_quote(self.view.substr(first_quote)) and is_regular_quote(self.view.substr(last_quote))
+            if not are_quotes:
+                continue # sanity check, just to 100% make sure we are replacing quotes
+            if is_jsx_attribute(self.view, point) and not is_jsx_attribute_wrapped_with_curly_brackets(self.view, point):
+                # insert surrounding curly brackets
+                self.view.replace(
+                    edit, sublime.Region(last_quote, last_quote + 1), '`}')
+                self.view.replace(
+                    edit, sublime.Region(first_quote, first_quote + 1), '{`')
+                continue
             self.view.replace(
-                edit, sublime.Region(last_quote, last_quote + 1), '`}')
+                edit, sublime.Region(last_quote, last_quote + 1), '`')
             self.view.replace(
-                edit, sublime.Region(first_quote, first_quote + 1), '{`')
-            return
-        self.view.replace(
-            edit, sublime.Region(last_quote, last_quote + 1), '`')
-        self.view.replace(
-            edit, sublime.Region(first_quote, first_quote + 1), '`')
+                edit, sublime.Region(first_quote, first_quote + 1), '`')
 
 
 def is_jsx_attribute(view: sublime.View, point: int) -> bool:
