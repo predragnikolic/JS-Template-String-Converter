@@ -14,7 +14,7 @@ class ConvertToTemplateString(sublime_plugin.TextCommand):
         regular_string_region = get_regular_string_region(self.view, point)
         if not regular_string_region:
             return
-        scan_region = self.view.substr(sublime.Region(point-2, point+2))
+        scan_region = self.view.substr(regular_string_region)
         # the user could typed $ or {
         if "${" not in scan_region:
             return
